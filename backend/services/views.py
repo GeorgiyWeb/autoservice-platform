@@ -12,7 +12,7 @@ from .serializers import ServiceSerializer
 class ServicePagination(PageNumberPagination):
     page_size = 10
     page_size_query_param = 'page_size'
-    max_page_size = 100
+    max_page_size = 100 # DoS protection:  prevents huge page_size requests
 
 
 class ServiceViewSet(viewsets.ModelViewSet):
