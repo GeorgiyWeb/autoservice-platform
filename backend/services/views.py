@@ -3,8 +3,8 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework import viewsets
 from rest_framework.pagination import PageNumberPagination
 
-from .models import Service
-from .serializers import ServiceSerializer
+from .models import Service, Master
+from .serializers import ServiceSerializer, MasterSerializer
 
 
 # Create your views here.
@@ -23,5 +23,12 @@ class ServiceViewSet(viewsets.ModelViewSet):
     search_fields = ['name', 'description']
     ordering_fields = ['name', 'price', 'duration_min']
     pagination_class = ServicePagination
-    
-    
+
+class MasterViewSet(viewsets.ModelVieeSet):
+    queryset = Master.objects.all()
+    serializer_class = MasterSerializer
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fileds = ['is_active', 'specialization']
+    ordering_fields = ['first_name', 'last_name', 'created_at']
+    search_fields = ['first_name', 'last_name', 'specialization']
+    pagination_class = ServicePagination
