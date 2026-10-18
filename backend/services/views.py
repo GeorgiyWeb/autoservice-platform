@@ -24,11 +24,11 @@ class ServiceViewSet(viewsets.ModelViewSet):
     ordering_fields = ['name', 'price', 'duration_min']
     pagination_class = ServicePagination
 
-class MasterViewSet(viewsets.ModelVieeSet):
+class MasterViewSet(viewsets.ModelViewSet):
     queryset = Master.objects.all()
     serializer_class = MasterSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fileds = ['is_active', 'specialization']
+    filterset_fields = ['is_active', 'specialization']
     ordering_fields = ['first_name', 'last_name', 'created_at']
     search_fields = ['first_name', 'last_name', 'specialization']
     pagination_class = ServicePagination
