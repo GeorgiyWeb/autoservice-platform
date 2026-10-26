@@ -3,8 +3,8 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework import viewsets
 from rest_framework.pagination import PageNumberPagination
 
-from .models import Service, Master
-from .serializers import ServiceSerializer, MasterSerializer
+from .models import Service, Master, Booking
+from .serializers import ServiceSerializer, MasterSerializer, BookingSerializer
 
 
 # Create your views here.
@@ -31,4 +31,12 @@ class MasterViewSet(viewsets.ModelViewSet):
     filterset_fields = ['is_active', 'specialization']
     ordering_fields = ['first_name', 'last_name', 'created_at']
     search_fields = ['first_name', 'last_name', 'specialization']
+    pagination_class = ServicePagination
+    
+class BookingViewSet(viewsets.ModelViewSet):
+    queryset = Booking.objects.all()
+    serializer_class = BookingSerializer
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterset_fields = ['date', 'status']
+    ordering_fields = ['created_at', 'date', 'start_time']
     pagination_class = ServicePagination

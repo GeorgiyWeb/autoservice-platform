@@ -42,7 +42,7 @@ class Master(models.Model):
     
     
 class Booking(models.Model):
-    STATUS_CHOICES = (
+    STATUS_CHOICES = (  
         ('pending', 'Pending'),
         ('confirmed', 'Confirmed'),
         ('cancelled', 'Cancelled'),
