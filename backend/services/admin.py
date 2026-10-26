@@ -1,7 +1,8 @@
 from django.contrib import admin
-from .models import Service, Master
+from .models import Service, Master, Booking
 
 # Register your models here.
 
 admin.site.register(Service)
 admin.site.register(Master)
+admin.site.register(Booking)

@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 # Create your models here.
 
@@ -38,6 +39,36 @@ class Master(models.Model):
     
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
+    
+    
+class Booking(models.Model):
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('confirmed', 'Confirmed'),
+        ('cancelled', 'Cancelled'),
+        ('completed', 'Completed'),
+    )
+    client = models.ForeignKey(User, on_delete=models.PROTECT, related_name="bookings")
+    service = models.ForeignKey(Service, on_delete=models.PROTECT, related_name="bookings")
+    master = models.ForeignKey(Master, on_delete=models.PROTECT, related_name="bookings")
+    date = models.DateField()
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=20,choices=STATUS_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-date', 'start_time']
+        
+    def __str__(self):
+        return f"{self.service} for {self.client} by {self.master}"
+    
+    def save(self, *args, **kwargs):
+        if not self.price:
+            self.price = self.service.price 
+        super().save(*args, **kwargs)
     
      
     
