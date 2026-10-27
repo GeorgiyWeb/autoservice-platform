@@ -40,3 +40,21 @@ class BookingViewSet(viewsets.ModelViewSet):
     filterset_fields = ['date', 'status']
     ordering_fields = ['created_at', 'date', 'start_time']
     pagination_class = ServicePagination
+    
+    def get_queryset(self):
+        user = self.request.user
+        
+        if not user.is_authenticated:
+                return Booking.objects.none()
+            
+        role = user.profile.role
+        
+        if role == "owner":
+            return Booking.objects.all()
+        elif role == "client":
+            return Booking.objects.filter(client=user)
+        
+
+        
+        
+        
