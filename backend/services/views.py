@@ -53,6 +53,10 @@ class BookingViewSet(viewsets.ModelViewSet):
             return Booking.objects.all()
         elif role == "client":
             return Booking.objects.filter(client=user)
+    
+    
+    def perform_create(self, serializer):
+        serializer.save(client=self.request.user)
         
 
         
