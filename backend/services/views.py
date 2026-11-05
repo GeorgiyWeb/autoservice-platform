@@ -2,6 +2,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework import viewsets
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from .models import Service, Master, Booking
 from .serializers import ServiceSerializer, MasterSerializer, BookingSerializer
@@ -59,6 +61,21 @@ class BookingViewSet(viewsets.ModelViewSet):
         serializer.save(client=self.request.user)
         
 
+    @action(detail=False, methods=["get"])
+    def slots(self, request):
+        master_id = request.query_params.get('master_id')
+        date = request.query_params.get('date')
         
+        if not master_id or not date:
+            return Response({"error": "master_id and date are required"}, status=400)
         
+        bookings = Booking.objects.filter(master_id=master_id, date=date)
         
+        busy_slots = []
+        for b in bookings:
+            busy_slots.append({
+                "start": b.start_time.strftime("%H:%M"),
+                "end": b.end_time.strftime("%H:%M")
+            })
+        
+        return Response({"date": date, "busy_slots": busy_slots})
