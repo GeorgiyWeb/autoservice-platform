@@ -4,6 +4,7 @@ from rest_framework import viewsets
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from datetime import timedelta, datetime, time
 
 from .models import Service, Master, Booking
 from .serializers import ServiceSerializer, MasterSerializer, BookingSerializer
@@ -65,17 +66,43 @@ class BookingViewSet(viewsets.ModelViewSet):
     def slots(self, request):
         master_id = request.query_params.get('master_id')
         date = request.query_params.get('date')
+        service_id = request.query_params.get('service_id') 
+
         
-        if not master_id or not date:
-            return Response({"error": "master_id and date are required"}, status=400)
-        
+        if not master_id or not date or not service_id:
+            return Response({"error": "master_id, date and service_id are required"}, status=400)
+
+       
+        service = Service.objects.get(id=service_id)
+        duration = service.duration_min
+
+     
         bookings = Booking.objects.filter(master_id=master_id, date=date)
+
+       
+        start_of_day = datetime.combine(datetime.strptime(date, "%Y-%m-%d").date(), time(9, 0))
+        end_of_day = datetime.combine(datetime.strptime(date, "%Y-%m-%d").date(), time(18, 0))
+        step = timedelta(minutes=30)
         
-        busy_slots = []
-        for b in bookings:
-            busy_slots.append({
-                "start": b.start_time.strftime("%H:%M"),
-                "end": b.end_time.strftime("%H:%M")
-            })
-        
-        return Response({"date": date, "busy_slots": busy_slots})
+        available_slots = []
+        current_time = start_of_day
+
+      
+        while current_time + timedelta(minutes=duration) <= end_of_day:
+            is_free = True
+            
+            for b in bookings:
+                if current_time.time() < b.end_time and (current_time + timedelta(minutes=duration)).time() > b.start_time:
+                    is_free = False
+                    break
+            
+            if is_free:
+                available_slots.append(current_time.strftime("%H:%M"))
+ 
+            current_time += step
+
+        return Response({"date": date, "available_slots": available_slots})
+    
+    
+    
+    
