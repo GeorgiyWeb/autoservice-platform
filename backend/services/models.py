@@ -1,9 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+from users.models import Autoservice
 # Create your models here.
 
 class Service(models.Model):
+    autoservice = models.ForeignKey(Autoservice, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -21,6 +23,7 @@ class Service(models.Model):
     
     
 class Master(models.Model):
+    autoservice = models.ForeignKey(Autoservice, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     phone = models.CharField(max_length=20, blank=True)
@@ -48,6 +51,7 @@ class Booking(models.Model):
         ('cancelled', 'Cancelled'),
         ('completed', 'Completed'),
     )
+    autoservice = models.ForeignKey(Autoservice, on_delete=models.CASCADE)
     client = models.ForeignKey(User, on_delete=models.PROTECT, related_name="bookings")
     service = models.ForeignKey(Service, on_delete=models.PROTECT, related_name="bookings")
     master = models.ForeignKey(Master, on_delete=models.PROTECT, related_name="bookings")

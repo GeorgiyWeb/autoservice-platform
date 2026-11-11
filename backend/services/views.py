@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from datetime import timedelta, datetime, time
 
 from .models import Service, Master, Booking
+from users.models import Autoservice
 from .serializers import ServiceSerializer, MasterSerializer, BookingSerializer
 
 
@@ -22,19 +23,42 @@ class ServiceViewSet(viewsets.ModelViewSet):
     queryset = Service.objects.all()
     serializer_class = ServiceSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ['is_active', 'price']
+    filterset_fields = ['is_active', 'price', 'autoservice']
     search_fields = ['name', 'description']
     ordering_fields = ['name', 'price', 'duration_min']
     pagination_class = ServicePagination
+    
+    def perform_create(self, serializer):
+        autoservice = Autoservice.objects.get(owner=self.request.user)
+        serializer.save(autoservice=autoservice)
+    
+    def get_queryset(self):
+        user = self.request.user
+        
+        if not user.is_authenticated:
+            return Service.objects.all()
+        
+        if user.profile.role == "owner":
+            try:
+                autoservice = Autoservice.objects.get(owner=user)
+                return Service.objects.filter(autoservice=autoservice)
+            except Autoservice.DoesNotExist:
+                return Service.objects.none()
+            
+        return Service.objects.all()
 
 class MasterViewSet(viewsets.ModelViewSet):
     queryset = Master.objects.all()
     serializer_class = MasterSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ['is_active', 'specialization']
+    filterset_fields = ['is_active', 'specialization', 'autoservice']
     ordering_fields = ['first_name', 'last_name', 'created_at']
     search_fields = ['first_name', 'last_name', 'specialization']
     pagination_class = ServicePagination
+    
+    def perform_create(self, serializer):
+        autoservice = Autoservice.objects.get(owner=self.request.user)
+        serializer.save(autoservice=autoservice)
     
 class BookingViewSet(viewsets.ModelViewSet):
     queryset = Booking.objects.all()
@@ -59,7 +83,9 @@ class BookingViewSet(viewsets.ModelViewSet):
     
     
     def perform_create(self, serializer):
-        serializer.save(client=self.request.user)
+        autoservice = Autoservice.objects.get(owner=self.request.user)
+        serializer.save(client=self.request.user, autoservice=autoservice)
+
         
 
     @action(detail=False, methods=["get"])
